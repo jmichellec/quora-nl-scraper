@@ -1,11 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
 import os
 import datetime
 import time
-import csv
 import re
+
 # start time
 start_time = datetime.datetime.now()
 
