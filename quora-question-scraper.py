@@ -34,14 +34,13 @@ for topic in topics:
 
 	# Get scroll height
 	last_height = driver.execute_script("return document.body.scrollHeight")
-	question_set = set()
 
 	# infinite while loop, break it when you reach the end of the page or not able to scroll further.
 	while True:
 		html_source = " "
 		i = 0
 
-		# try to scroll 20 times in case of slow connection
+		# try to scroll 5 times in case of slow connection
 		while i < 5:
 
 			# Scroll down to one page length
@@ -63,12 +62,10 @@ for topic in topics:
 		regex_Qs = r"https:\/\/nl\.quora\.com\/[A-Z][A-Za-zÀ-ž0-9\%\\u0370-\\u03FF\\u0400\-\\u04FF]+[A-Za-zÀ-ž0-9]"
 
 		matches = re.findall(regex_Qs, html_source, re.MULTILINE)
-		clean_matches = []
+		unique_questions = set()
 		for match in matches:
 			clean_match = match.split('?')[0]
-			clean_matches.append(clean_match)
-
-		unique_questions = set(clean_matches)
+			unique_questions.add(clean_match)
 
 		time.sleep(SCROLL_PAUSE_TIME)
 		# not able to scroll further, break the infinite loop
