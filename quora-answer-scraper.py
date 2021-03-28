@@ -120,10 +120,10 @@ for topic in topics:
 		for answer in answer_set:
 			# question, user_bio, answer
 			f.write(question+';'+answer[0]+';'+answer[1]+'\n')
+		print('quitting chrome')
+		driver.quit()
 	f.close()
 
-	print('quitting chrome')
-	driver.quit()
 
 # finish time
 end_time = datetime.datetime.now()
