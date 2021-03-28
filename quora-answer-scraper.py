@@ -4,8 +4,10 @@ import os
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
-import csv
+from ordered_set import OrderedSet
 
+# Fill in date of search
+date = '28-03-2021'
 # start time
 start_time = datetime.datetime.now()
 
@@ -15,10 +17,17 @@ topics = file_question_topics.readlines()
 
 for topic in topics:
 	# read questions form files under questions directory
-	questions_file = topic + '_question_urls.txt'
+	questions_file = topic + '_question_urls_'+date+'.csv'
 	questions = open('questions/'+ questions_file, mode='r', encoding='utf-8')
+	# write contents of set to a file called answers.csv
+	answers_directory = 'answers'
+	os.makedirs('answers', exist_ok=True)
+	file_name = answers_directory + '/' + topic +'_'+date+ '_answers.csv'
+	f = open(file_name, mode='a', encoding='utf-8')
+	f.write('question'+';'+'user_bio'+';'+'text'+'\n')
 
 	for question in questions:
+		question = question.rstrip()
 		print('Question: ', question)
 		# instantiate a chrome options object so you can set the size and headless preference
 		chrome_options = Options()
@@ -31,7 +40,6 @@ for topic in topics:
 
 		# Set the browser settings to web driver
 		driver = webdriver.Chrome(chrome_options=chrome_options, executable_path=chrome_driver)
-		# driver = webdriver.Chrome(executable_path=chrome_driver)
 
 		# give the url to scrap
 		driver.get(question)
@@ -45,7 +53,7 @@ for topic in topics:
 
 		# Get scroll height
 		last_height = driver.execute_script("return document.body.scrollHeight")
-		answer_set = set()
+		answer_set = OrderedSet()
 
 		# infinite while loop, break it when you reach the end of the page or not able to scroll further.
 		while True:
@@ -73,19 +81,33 @@ for topic in topics:
 			html_source = driver.page_source
 			soup = BeautifulSoup(html_source, 'html.parser')
 
-			# question_link is the class for questions
-			# answer_texts = soup.find_all('div', attrs={'class': 'ui_qtext_expanded'})
-			answer_texts = soup.find_all('span', attrs={'class': 'q-box qu-userSelect--text'})
-			print(answer_texts)
-			#q-relative spacing_log_answer_content puppeteer_test_answer_content
-			# add questions to a set for uniqueness
-			for answer in answer_texts:
-				# <div class=""ui_qtext_expanded""><span class=""ui_qtext_rendered_qtext"">
-				# answer = str(answer).lstrip("<div class=\"ui_qtext_expanded\"><span class=\"ui_qtext_rendered_qtext\">").rstrip("</span></div>")
-				answer = str(answer).lstrip("<div class=\"q-text\"><span class=\"ui_qtext_rendered_qtext\">").rstrip("</span></div>")
+			# get answers
+			answer_texts = soup.find_all('div', attrs={'class': 'q-relative spacing_log_answer_content puppeteer_test_answer_content'})
+			# get occupation/bio description
+			users = soup.find_all('span', attrs={'class': 'CssComponent-sc-1oskqb9-0 AbstractSeparatedItems___StyledCssComponent-sc-46kfvf-0 bxBZxD'})
+			user_bios = []
+			for i in range(len(users)-1):
 
-				answer_set.add(answer)
+				# css finds weergaven too, remove those
+				if 'weergaven' not in users[i].text:
+					user_bio = users[i].find('span', attrs={'class': 'q-text qu-borderWidth--retinaOverride qu-borderWidth--regular'})
+					if user_bio == None:
+						user_bio = 'None'
+					else:
+						user_bio = user_bio.text
+					user_bios.append(user_bio)
 
+			for i, answer in enumerate(answer_texts):
+				# clean_paragraphs = []
+				paragraphs = answer.find_all(text=True)
+				# for paragraph in paragraphs:
+				# 	if paragraph == ' ':
+				# 		paragraph = '\n'
+				# 	clean_paragraphs.append(paragraph)
+				print(user_bios[i])
+				print("".join(paragraphs))
+
+				answer_set.add((user_bios[i], "".join(paragraphs)))
 			# not able to scroll further, break the infinite loop
 			new_height = driver.execute_script("return document.body.scrollHeight")
 			if new_height == last_height:
@@ -94,19 +116,14 @@ for topic in topics:
 
 			print('Total Answers: ' + str(len(answer_set)))
 
-		#write contents of set to a file called answers.txt
-		answers_directory = 'answers'
-		os.makedirs('answers', exist_ok=True)
-		file_name = answers_directory + '/' + topic + '_answers.txt'
-		f = open(file_name, mode='a', encoding='utf-8')
+		# Write to csv
 		for answer in answer_set:
-			# link_url = "http://www.quora.com" + ques.attrs['href']
-			print(answer)
-			f.write(answer+'\n')
-		f.close()
+			# question, user_bio, answer
+			f.write(question+';'+answer[0]+';'+answer[1]+'\n')
+	f.close()
 
-		print('quitting chrome')
-		driver.quit()
+	print('quitting chrome')
+	driver.quit()
 
 # finish time
 end_time = datetime.datetime.now()

@@ -4,9 +4,14 @@ import os
 import datetime
 import time
 import re
+from ordered_set import OrderedSet
 
 # start time
 start_time = datetime.datetime.now()
+today = datetime.date.today()
+
+# dd/mm/YY
+date = today.strftime("%d-%m-%Y")
 
 # read topics form a file
 file_question_topics = open("topic_list.txt", mode='r', encoding='utf-8')
@@ -61,7 +66,7 @@ for topic in topics:
 		regex_Qs = r"https:\/\/nl\.quora\.com\/[A-Z][A-Za-zÀ-ž0-9\%\\u0370-\\u03FF\\u0400\-\\u04FF]+[A-Za-zÀ-ž0-9]"
 
 		matches = re.findall(regex_Qs, html_source, re.MULTILINE)
-		unique_questions = set()
+		unique_questions = OrderedSet()
 		for match in matches:
 			clean_match = match.split('?')[0]
 			unique_questions.add(clean_match)
@@ -74,10 +79,10 @@ for topic in topics:
 		last_height = new_height
 
 
-	# write content of set to a file called question_urls.txt
+	# write content of set to a file called question_urls_date.csv
 	questions_directory = 'questions'
 	os.makedirs('questions', exist_ok=True)
-	file_name = questions_directory + '/' + topic + '_question_urls.txt'
+	file_name = questions_directory + '/' + topic + '_question_urls_'+date+'.csv'
 	file_question_urls = open(file_name, mode='w', encoding='utf-8')
 	for question in unique_questions:
 		link_url = question
