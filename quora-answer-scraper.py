@@ -24,7 +24,7 @@ for topic in topics:
 	os.makedirs('answers', exist_ok=True)
 	file_name = answers_directory + '/' + topic +'_'+date+ '_answers.csv'
 	f = open(file_name, mode='a', encoding='utf-8')
-	f.write('question'+';'+'user_bio'+';'+'text'+'\n')
+	f.write('question'+'\t'+'user_bio'+'\t'+'text'+'\n')
 
 	for question in questions:
 		question = question.rstrip()
@@ -98,20 +98,15 @@ for topic in topics:
 					user_bios.append(user_bio)
 
 			for i, answer in enumerate(answer_texts):
-				clean_paragraphs = []
+				# clean_paragraphs = []
 				paragraphs = answer.find_all(text=True)
 
 				# Bit of cleaning to fit the csv
-				for paragraph in paragraphs:
-					if paragraph == '\n':
-						paragraph = ' '
-					if paragraph == ';':
-						paragraph = '.'
-					clean_paragraphs.append(paragraph)
+				# Code
 				print(user_bios[i])
-				print("".join(clean_paragraphs))
+				print("".join(paragraphs))
 
-				answer_set.add((user_bios[i], "".join(clean_paragraphs)))
+				answer_set.add((user_bios[i], "".join(paragraphs)))
 			# not able to scroll further, break the infinite loop
 			new_height = driver.execute_script("return document.body.scrollHeight")
 			if new_height == last_height:
@@ -123,7 +118,7 @@ for topic in topics:
 		# Write to csv
 		for answer in answer_set:
 			# question, user_bio, answer
-			f.write(question+';'+answer[0]+';'+answer[1]+'\n')
+			f.write(question+'\t'+answer[0]+'\t'+answer[1]+'\n')
 		print('quitting chrome')
 		driver.quit()
 	f.close()
