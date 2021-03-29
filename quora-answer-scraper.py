@@ -60,7 +60,7 @@ for topic in topics:
 			html_source = " "
 			i = 0
 
-			# try to scroll 20 times in case of slow connection
+			# try to scroll 5 times in case of slow connection
 			while i < 5:
 
 				# Scroll down to one page length
@@ -98,16 +98,20 @@ for topic in topics:
 					user_bios.append(user_bio)
 
 			for i, answer in enumerate(answer_texts):
-				# clean_paragraphs = []
+				clean_paragraphs = []
 				paragraphs = answer.find_all(text=True)
-				# for paragraph in paragraphs:
-				# 	if paragraph == ' ':
-				# 		paragraph = '\n'
-				# 	clean_paragraphs.append(paragraph)
-				print(user_bios[i])
-				print("".join(paragraphs))
 
-				answer_set.add((user_bios[i], "".join(paragraphs)))
+				# Bit of cleaning to fit the csv
+				for paragraph in paragraphs:
+					if paragraph == '\n':
+						paragraph = ' '
+					if paragraph == ';':
+						paragraph = '.'
+					clean_paragraphs.append(paragraph)
+				print(user_bios[i])
+				print("".join(clean_paragraphs))
+
+				answer_set.add((user_bios[i], "".join(clean_paragraphs)))
 			# not able to scroll further, break the infinite loop
 			new_height = driver.execute_script("return document.body.scrollHeight")
 			if new_height == last_height:
