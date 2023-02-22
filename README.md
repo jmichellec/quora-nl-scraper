@@ -1,5 +1,5 @@
 # Quora NL Scraper
-Scrape questions and answers from Quora NL, which is formatted differently than English Quora. This code is an adaptation of the English version from: https://github.com/sdhanendra/quora-scraper.
+Code to scrape question and answers from Quora NL. Adaptation of the [English version](https://github.com/sdhanendra/quora-scraper).
 
 
 `topic_list.txt`: text file with topics on each newline, of which each word of the topic needs to be lowercased and joined by '%20' as substitute for space. For example: 'mark%20rutte'<br />
